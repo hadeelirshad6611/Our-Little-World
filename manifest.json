@@ -1,0 +1,9 @@
+{
+  "name":"Our Little World",
+  "short_name":"Our Little World",
+  "start_url":"./index.html",
+  "display":"standalone",
+  "background_color":"#fff7f8",
+  "theme_color":"#f36b91",
+  "icons":[]
+}

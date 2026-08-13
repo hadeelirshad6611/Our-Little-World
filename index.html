@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Our Little World 💕</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#f36b91">
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:linear-gradient(160deg,#fff7f8,#f8efff);color:#352936}
+.app{max-width:430px;margin:auto;min-height:100vh;padding-bottom:82px}
+header{padding:28px 22px 12px;text-align:center}h1{font-size:31px;margin:5px 0;color:#e85883}h2{margin:10px 0 6px}p{line-height:1.45}
+.card{background:#fff;border-radius:24px;padding:18px;margin:12px 16px;box-shadow:0 8px 24px #7c4b6315}
+.hero{background:linear-gradient(135deg,#ffb4c9,#caa7f5);color:white;text-align:center;padding:28px 18px;border-radius:28px;margin:10px 16px}
+.big{font-size:42px;font-weight:800;margin:8px}.muted{color:#856f7e;font-size:13px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 16px}.tile{background:#fff;border-radius:20px;padding:15px;box-shadow:0 6px 18px #7c4b6312}.emoji{font-size:25px}
+button{border:0;border-radius:16px;padding:13px 18px;font-weight:700;background:#f36b91;color:white;cursor:pointer}button.secondary{background:#f3e7ee;color:#6e5061}
+input{width:100%;padding:13px;border:1px solid #ead8e1;border-radius:14px;margin:6px 0 12px;font-size:16px}
+nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #f0dfe7;display:flex;justify-content:center;gap:6px;padding:10px;z-index:3}
+nav button{background:transparent;color:#745868;padding:9px 11px;font-size:12px}.screen{display:none}.screen.active{display:block}
+.memory{display:flex;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid #f3e7ed}.memory:last-child{border:0}.thumb{width:58px;height:58px;border-radius:16px;background:linear-gradient(135deg,#ffd2df,#d8c7ff);display:grid;place-items:center;font-size:25px}
+</style>
+</head>
+<body>
+<div class="app">
+<section id="home" class="screen active">
+<header><div class="muted">A private space for two</div><h1>Our Little World 💕</h1></header>
+<div class="hero"><div>You ❤️ Your Person</div><div class="big" id="days">0</div><div>days together</div><p>Two hearts. One little world.</p></div>
+<div class="card"><div class="muted">🔥 DAILY STREAK</div><h2 id="streak">1 day</h2><p>Today's little challenge: <b>Tell your partner one tiny thing you love about them.</b></p><button onclick="completeChallenge()">Complete together 💗</button></div>
+<div class="grid">
+<div class="tile"><div class="emoji">✈️</div><b id="meet">Set meeting countdown</b><p class="muted">Until I see you again</p></div>
+<div class="tile"><div class="emoji">💌</div><b>Today's question</b><p class="muted">Answer privately first</p></div>
+</div>
+</section>
+
+<section id="memories" class="screen">
+<header><h1>Our Memories 📸</h1><p class="muted">Little moments that became our story.</p></header>
+<div class="card"><input id="memoryTitle" placeholder="Memory title"><input id="memoryNote" placeholder="A little note"><button onclick="addMemory()">+ Add memory</button></div>
+<div class="card" id="memoryList"></div>
+</section>
+
+<section id="bucket" class="screen">
+<header><h1>Our Bucket List 🎁</h1></header>
+<div class="card"><input id="bucketInput" placeholder="Something we want to do together"><button onclick="addBucket()">Add dream ✨</button></div>
+<div class="card" id="bucketList"></div>
+</section>
+
+<section id="profile" class="screen">
+<header><h1>Our Profile 💕</h1></header>
+<div class="card"><label>Our names</label><input id="names" value="You & Your Person"><label>Together since</label><input id="since" type="date" value=""><button onclick="saveProfile()">Save our world</button></div>
+</section>
+</div>
+
+<nav>
+<button onclick="show('home')">🏠<br>Home</button>
+<button onclick="show('memories')">📸<br>Memories</button>
+<button onclick="show('bucket')">🎁<br>Bucket</button>
+<button onclick="show('profile')">💗<br>Profile</button>
+</nav>
+
+<script>
+const get=(k,d)=>JSON.parse(localStorage.getItem(k)||JSON.stringify(d));
+const set=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
+function show(id){document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');render();}
+function render(){
+ const since=get('since',''); document.getElementById('since').value=since;
+ const start=since ? new Date(since) : null, now=new Date();
+ document.getElementById('days').textContent=start ? Math.max(0,Math.floor((now-start)/86400000)) : '—';
+ document.getElementById('streak').textContent=get('streak',1)+' day'+(get('streak',1)==1?'':'s');
+ const memories=get('memories',[]); document.getElementById('memoryList').innerHTML=memories.length?memories.map((m,i)=>`<div class="memory"><div class="thumb">💞</div><div><b>${esc(m.t)}</b><div class="muted">${esc(m.n)}</div></div></div>`).join(''):'<p class="muted">Your first memory is waiting here. 🥹</p>';
+ const bucket=get('bucket',[]); document.getElementById('bucketList').innerHTML=bucket.length?bucket.map((b,i)=>`<p><label><input style="width:auto;margin:0 8px 0 0" type="checkbox" ${b.done?'checked':''} onchange="toggleBucket(${i})">${esc(b.text)}</label></p>`).join(''):'<p class="muted">Add your first little dream together.</p>';
+}
+function esc(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+function addMemory(){let t=document.getElementById('memoryTitle').value.trim(),n=document.getElementById('memoryNote').value.trim();if(!t)return;let a=get('memories',[]);a.unshift({t,n});set('memories',a);document.getElementById('memoryTitle').value='';document.getElementById('memoryNote').value='';render();}
+function addBucket(){let x=document.getElementById('bucketInput').value.trim();if(!x)return;let a=get('bucket',[]);a.push({text:x,done:false});set('bucket',a);document.getElementById('bucketInput').value='';render();}
+function toggleBucket(i){let a=get('bucket',[]);a[i].done=!a[i].done;set('bucket',a);render();}
+function completeChallenge(){set('streak',get('streak',1)+1);alert('Aww! Challenge completed together 💕');render();}
+function saveProfile(){set('since',document.getElementById('since').value);alert('Your little world is saved 💗');render();}
+render();
+</script>
+</body>
+</html>
